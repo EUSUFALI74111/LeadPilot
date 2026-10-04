@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once dirname(__DIR__).'/bootstrap.php';require_method('GET');$u=current_user();$s=db()->prepare('SELECT id,INET6_NTOA(ip_address) ip,user_agent userAgent,last_used_at lastUsedAt,created_at createdAt,(id=?) current FROM auth_sessions WHERE user_id=? AND tenant_id=? AND revoked_at IS NULL AND refresh_expires_at>UTC_TIMESTAMP() ORDER BY last_used_at DESC');$s->execute([$u['session_id'],$u['id'],$u['tenant_id']]);respond($s->fetchAll());

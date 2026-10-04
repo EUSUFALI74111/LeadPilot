@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once dirname(__DIR__).'/bootstrap.php';require_method('POST');$u=current_user();require_csrf();db()->prepare('UPDATE auth_sessions SET revoked_at=UTC_TIMESTAMP() WHERE user_id=? AND tenant_id=? AND revoked_at IS NULL')->execute([$u['id'],$u['tenant_id']]);audit('security.sessions_revoked','user',$u['public_id']);clear_session_cookies();respond(['message'=>'All sessions signed out.']);

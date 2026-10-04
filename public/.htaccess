@@ -1,0 +1,30 @@
+Options -Indexes
+ServerSignature Off
+
+RewriteEngine On
+
+# Force HTTPS after Hostinger provisions the certificate.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Never serve application secrets or server-only project files.
+<FilesMatch "^(\.env|composer\.(json|lock)|package(-lock)?\.json|bun\.lock|.*\.sql)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# Existing files/directories include PHP API endpoints and static assets.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Client-side application routes all load the SPA entry point.
+RewriteRule ^ index.html [L]

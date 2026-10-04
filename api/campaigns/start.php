@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once dirname(__DIR__).'/bootstrap.php';require_method('POST');$u=current_user();require_csrf();$id=string_value(input(),'id',36);authorize_campaign($id);$s=db()->prepare("UPDATE campaigns SET status='QUEUED',scheduled_at=COALESCE(scheduled_at,UTC_TIMESTAMP()) WHERE tenant_id=? AND public_id=? AND status='DRAFT'");$s->execute([$u['tenant_id'],$id]);if(!$s->rowCount())throw new ApiError(409,'Only draft campaigns can be started.');audit('campaign.started','campaign',$id);respond(['status'=>'QUEUED']);

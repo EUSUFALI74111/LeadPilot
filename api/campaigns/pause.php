@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once dirname(__DIR__).'/bootstrap.php';require_method('POST');$u=current_user();require_csrf();$id=string_value(input(),'id',36);authorize_campaign($id);$s=db()->prepare("UPDATE campaigns SET status='PAUSED' WHERE tenant_id=? AND public_id=? AND status IN ('QUEUED','RUNNING')");$s->execute([$u['tenant_id'],$id]);if(!$s->rowCount())throw new ApiError(409,'This campaign cannot be paused.');audit('campaign.paused','campaign',$id);respond(['status'=>'PAUSED']);
